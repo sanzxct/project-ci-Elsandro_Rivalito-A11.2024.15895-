@@ -1,0 +1,34 @@
+services:
+  app:
+    build: .
+    container_name: project-ci-app
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+    environment:
+      APACHE_DOCUMENT_ROOT: /var/www/html/public
+    command: >
+      sh -c "sed -ri -e 's!/var/www/html!$${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf &&
+             sed -ri -e 's!/var/www/!$${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf &&
+             apache2-foreground"
+    networks:
+      - belajar-ci-network
+
+  db:
+    image: mysql:8.0
+    container_name: project-ci-db
+    restart: always
+    environment:
+      MYSQL_DATABASE: project_ci
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: sandro123
+      MYSQL_PASSWORD: sandro123
+    ports:
+      - "3307:3306"
+    networks:
+      - belajar-ci-network
+
+networks:
+  belajar-ci-network:
+    driver: bridge
