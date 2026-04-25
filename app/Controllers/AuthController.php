@@ -7,7 +7,8 @@ use CodeIgniter\HTTP\ResponseInterface;
 
 class AuthController extends BaseController
 {
-    public function __construct() {
+    public function __construct()
+    {
         helper('form');
     }
     public function login()
@@ -17,16 +18,36 @@ class AuthController extends BaseController
             $password = $this->request->getVar('password');
 
             $dataUser = [
-                'username' => 'april', 
-                'password' => '202cb962ac59075b964b07152d234b70', 
-                'role' => 'admin'
-                ]; // passw 123
+                [
+                    'username' => 'april',
+                    'password' => '202cb962ac59075b964b07152d234b70', // passw 123
+                    'role' => 'admin',
+                    'email' => 'april@gmail.com'
+                ],
+                [
+                    'username' => 'Elsandro',
+                    'password' => '81dc9bdb52d04dc20036dbd8313ed055', // passw 1234
+                    'role' => 'admin',
+                    'email' => 'elsandro@gmail.com'
+                ],
+                [
+                    'username' => 'budispeed',
+                    'password' => '81dc9bdb52d04dc20036dbd8313ed055', // passw 1234
+                    'role' => 'member',
+                    'email' => 'budi@gmail.com'
+                ]
+            ];
 
+            $index = array_search($username, array_column($dataUser, 'username'));
+            $dataUser = $index !== false ? $dataUser[$index] : ['username' => null, 'password' => null, 'role' => null];
             if ($username == $dataUser['username']) {
                 if (md5($password) == $dataUser['password']) {
                     session()->set([
                         'username' => $dataUser['username'],
                         'role' => $dataUser['role'],
+                        'email' => $dataUser['email'],
+                        'login_time' => date('Y-m-d H:i:s'),
+                        'status' => 'Active',
                         'isLoggedIn' => TRUE
                     ]);
 

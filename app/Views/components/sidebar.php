@@ -8,16 +8,12 @@
                 <i class="bi bi-grid"></i>
                 <span>Home</span>
             </a>
-        </li><!-- End Home Nav -->
-
-        <li class="nav-item">
+        </li><li class="nav-item">
             <a class="nav-link <?php echo (uri_string() == 'keranjang') ? "" : "collapsed" ?>" href="keranjang">
                 <i class="bi bi-cart-check"></i>
                 <span>Keranjang</span>
             </a>
-        </li><!-- End Keranjang Nav --> 
-        
-        <?php
+        </li><?php
             if(session() -> get('role') == 'admin') {
         ?>
         <li class="nav-item">
@@ -25,10 +21,15 @@
                 <i class="bi bi-receipt"></i>
                 <span>Produk</span>
             </a>
-        </li><!-- End Produk Nav --> 
-        <?php
+        </li><?php
             }
         ?>
-    </ul>
+
+        <li class="nav-item">
+            <a class="nav-link <?php echo (uri_string() == 'profil') ? "" : "collapsed" ?>" href="profil">
+                <i class="bi bi-person-lines-fill"></i>
+                <span>Profile</span>
+            </a>
+        </li></ul>
 
 </aside><!-- End Sidebar-->
