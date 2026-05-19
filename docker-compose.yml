@@ -29,6 +29,18 @@ services:
     networks:
       - belajar-ci-network
 
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: project-ci-phpmyadmin
+    restart: always
+    ports:
+      - "8081:80"
+    environment:
+      - PMA_HOST=db
+      - PMA_PORT=3306
+    networks:
+      - belajar-ci-network
+
 networks:
   belajar-ci-network:
     driver: bridge
