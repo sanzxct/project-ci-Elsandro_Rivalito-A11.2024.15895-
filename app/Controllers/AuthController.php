@@ -4,70 +4,68 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
+use App\Models\UserModel; 
 
 class AuthController extends BaseController
 {
+    protected $userModel;
+
     public function __construct()
     {
         helper('form');
+        $this->userModel = new UserModel();
     }
+
     public function login()
     {
+        // 1. Cek Request POST
         if ($this->request->getPost()) {
-            $username = $this->request->getVar('username');
-            $password = $this->request->getVar('password');
-
-            $dataUser = [
-                [
-                    'username' => 'april',
-                    'password' => '202cb962ac59075b964b07152d234b70', // passw 123
-                    'role' => 'admin',
-                    'email' => 'april@gmail.com'
-                ],
-                [
-                    'username' => 'Elsandro',
-                    'password' => '81dc9bdb52d04dc20036dbd8313ed055', // passw 1234
-                    'role' => 'admin',
-                    'email' => 'elsandro@gmail.com'
-                ],
-                [
-                    'username' => 'budispeed',
-                    'password' => '81dc9bdb52d04dc20036dbd8313ed055', // passw 1234
-                    'role' => 'member',
-                    'email' => 'budi@gmail.com'
-                ]
+            $rules = [
+                'username' => 'required|min_length[6]',
+                'password' => 'required|min_length[7]|numeric',
             ];
+        
+            // 2. Cek Validasi
+            if ($this->validate($rules)) {
+                $username = $this->request->getVar('username');
+                $password = $this->request->getVar('password');
+                $dataUser = $this->userModel->where(['username' => $username])->first();
+                
+                if ($dataUser) {
+                    if (password_verify($password, $dataUser['password'])) {
+                        session()->set([
+                            'username'   => $dataUser['username'],
+                            'role'       => $dataUser['role'],
+                            'email'      => $dataUser['email'],
+                            'login_time' => date('Y-m-d H:i:s'),
+                            'status'     => 'Active',
+                            'isLoggedIn' => TRUE
+                        ]);
 
-            $index = array_search($username, array_column($dataUser, 'username'));
-            $dataUser = $index !== false ? $dataUser[$index] : ['username' => null, 'password' => null, 'role' => null];
-            if ($username == $dataUser['username']) {
-                if (md5($password) == $dataUser['password']) {
-                    session()->set([
-                        'username' => $dataUser['username'],
-                        'role' => $dataUser['role'],
-                        'email' => $dataUser['email'],
-                        'login_time' => date('Y-m-d H:i:s'),
-                        'status' => 'Active',
-                        'isLoggedIn' => TRUE
-                    ]);
-
-                    return redirect()->to(base_url('/'));
+                        return redirect()->to(base_url('/'));
+                    } else {
+                        session()->setFlashdata('failed', 'Username & Password Salah');
+                        return redirect()->back()->withInput();
+                    }
                 } else {
-                    session()->setFlashdata('failed', 'Username & Password Salah');
-                    return redirect()->back();
+                    session()->setFlashdata('failed', 'Username Tidak Ditemukan');
+                    return redirect()->back()->withInput();
                 }
             } else {
-                session()->setFlashdata('failed', 'Username Tidak Ditemukan');
-                return redirect()->back();
-            }
-        } else {
-            return view('v_login');
-        }
+                
+                session()->setFlashdata('failed', $this->validator->listErrors());
+                return redirect()->back()->withInput();
+            } 
+            
+        } 
+
+
+        return view('v_login');
     }
 
     public function logout()
     {
         session()->destroy();
-        return redirect()->to('login');
+        return redirect()->to(base_url('login'));
     }
 }

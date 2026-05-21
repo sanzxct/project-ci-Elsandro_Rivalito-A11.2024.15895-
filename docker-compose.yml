@@ -8,9 +8,9 @@ services:
       - .:/var/www/html
     environment:
       APACHE_DOCUMENT_ROOT: /var/www/html/public
+    # Perintah di bawah ini diganti agar hanya mengubah konfigurasi site, jauh lebih aman
     command: >
       sh -c "sed -ri -e 's!/var/www/html!$${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf &&
-             sed -ri -e 's!/var/!$${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf &&
              apache2-foreground"
     networks:
       - belajar-ci-network
@@ -46,7 +46,6 @@ services:
 networks:
   belajar-ci-network:
     driver: bridge
-
 
 volumes:
   mysql_data:
