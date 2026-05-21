@@ -5,16 +5,12 @@
 <section class="section">
     <div class="row">
         <div class="col-lg-12">
-            
             <div class="card shadow-sm border-0">
-                <div class="card-body">
-                    
+                <div class="card-body">     
                     <div class="p-4 mt-3" style="background-color: #f6f9ff; border-radius: 8px;">
-                        
                         <h6 class="mb-4" style="font-weight: 700; color: #012970; font-size: 1.1rem;">
                             Profile Information
                         </h6>
-
                         <div class="row mb-3 align-items-center">
                             <div class="col-lg-3 col-md-4 label" style="color: #4154f1; font-weight: 600;">
                                 Username
