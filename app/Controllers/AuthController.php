@@ -52,7 +52,6 @@ class AuthController extends BaseController
                     return redirect()->back()->withInput();
                 }
             } else {
-                
                 session()->setFlashdata('failed', $this->validator->listErrors());
                 return redirect()->back()->withInput();
             } 

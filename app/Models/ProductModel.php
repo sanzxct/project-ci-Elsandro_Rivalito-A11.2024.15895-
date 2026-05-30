@@ -21,7 +21,7 @@ class ProductModel extends Model
     protected array $castHandlers = [];
 
     // Dates
-    protected $useTimestamps = false;
+    protected $useTimestamps = true;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
@@ -30,7 +30,7 @@ class ProductModel extends Model
     // Validation
     protected $validationRules      = [];
     protected $validationMessages   = [];
-    protected $skipValidation       = false;
+    protected $skipValidation       = true;
     protected $cleanValidationRules = true;
 
     // Callbacks
