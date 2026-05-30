@@ -20,7 +20,6 @@
                                 <span class="badge bg-danger ms-2 px-2 py-1"><?= esc(session()->get('role')); ?></span>
                             </div>
                         </div>
-
                         <div class="row mb-3 align-items-center">
                             <div class="col-lg-3 col-md-4 label" style="color: #4154f1; font-weight: 600;">
                                 Email
