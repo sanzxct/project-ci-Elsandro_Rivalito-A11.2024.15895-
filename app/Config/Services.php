@@ -19,14 +19,18 @@ use CodeIgniter\Config\BaseService;
  */
 class Services extends BaseService
 {
-    /*
-     * public static function example($getShared = true)
-     * {
-     *     if ($getShared) {
-     *         return static::getSharedInstance('example');
-     *     }
-     *
-     *     return new \CodeIgniter\Example();
-     * }
-     */
+    public static function cart($getShared = true)
+    {
+        if ($getShared) {
+            return static::getSharedInstance('cart');
+        }
+
+        $cart = new \CodeIgniterCart\Cart();
+
+        // MATIKAN VALIDASI KETATNYA DI SINI
+        // Ini akan memaksa library menerima nama produk apa pun (termasuk yang ada spasi/simbol)
+        $cart->productNameSafe = false;
+
+        return $cart;
+    }
 }

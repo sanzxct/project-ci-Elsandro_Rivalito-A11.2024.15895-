@@ -6,7 +6,6 @@ use CodeIgniter\Router\RouteCollection;
  * @var RouteCollection $routes
  */
 $routes->get('/', 'Home::index', ['filter' => 'auth']);
-$routes->get('/keranjang', 'KeranjangController::keranjang', ['filter' => 'auth']);
 $routes->get('/profil', 'ProfileController::profil', ['filter' => 'auth']);
 $routes->get('/faq', 'Home::faq', ['filter' => 'auth']);
 $routes->get('/contact', 'Home::contact', ['filter' => 'auth']);
@@ -22,5 +21,17 @@ $routes->group('produk', ['filter' => ['auth', 'admin']], function($routes) {
     $routes->post('/', 'ProdukController::create');
     $routes->post('edit/(:any)', 'ProdukController::edit/$1');
     $routes->get('delete/(:any)', 'ProdukController::delete/$1');
+    $routes->get('download', 'ProdukController::download');
 });
+
+//keranjang
+$routes->group('keranjang', ['filter' => 'auth'], function ($routes) {
+    $routes->get('', 'KeranjangController::index');
+    $routes->post('', 'KeranjangController::cart_add');
+    $routes->post('edit', 'KeranjangController::cart_edit');
+    $routes->get('delete/(:any)', 'KeranjangController::cart_delete/$1');
+    $routes->get('clear', 'KeranjangController::cart_clear');
+});
+
+$routes->get('/keranjang', 'KeranjangController::keranjang', ['filter' => 'auth']);
 
