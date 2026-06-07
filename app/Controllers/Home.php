@@ -7,8 +7,10 @@ use App\Models\ProductModel;
 class Home extends BaseController
 {
     protected $productModel;
+    
 
     public function __construct() {
+        helper(['number', 'form']);
         $this->productModel = new ProductModel();
     }
 
