@@ -10,7 +10,7 @@ class AdminFilter implements FilterInterface
 {
     public function before(RequestInterface $request, $arguments = null)
     {
-        // Jika yang login BUKAN admin, kembalikan ke halaman Home
+         // Do something here
         if(session()->get('role') != 'admin') {
             return redirect()->to(site_url('/'));
         }
@@ -18,6 +18,6 @@ class AdminFilter implements FilterInterface
 
     public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
     {
-        // Kosongkan
+         // Do something here
     }
 }
