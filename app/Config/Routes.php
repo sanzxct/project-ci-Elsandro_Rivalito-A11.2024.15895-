@@ -35,3 +35,12 @@ $routes->group('keranjang', ['filter' => 'auth'], function ($routes) {
 
 $routes->get('/keranjang', 'KeranjangController::keranjang', ['filter' => 'auth']);
 
+
+//checkout
+$routes->get('checkout', 'KeranjangController::checkout', ['filter' => 'auth']);
+
+//search
+$routes->get('ajax/destinations','KeranjangController::destinations', ['filter' => 'auth']);
+$routes->get('ajax/costs','KeranjangController::costs', ['filter' => 'auth']);
+
+$routes->post('buy', 'KeranjangController::buy', ['filter' => 'auth']);
