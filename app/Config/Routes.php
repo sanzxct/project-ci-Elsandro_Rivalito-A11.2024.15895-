@@ -44,3 +44,14 @@ $routes->get('ajax/destinations','KeranjangController::destinations', ['filter' 
 $routes->get('ajax/costs','KeranjangController::costs', ['filter' => 'auth']);
 
 $routes->post('buy', 'KeranjangController::buy', ['filter' => 'auth']);
+
+
+//history
+$routes->get('history', 'KeranjangController::history', ['filter' => 'auth']);
+
+
+//api
+$routes->resource('api/products', ['controller' => 'Api\ProdukController']);
+
+
+$routes->get('api/transactions', 'Api\TransaksiController::index');
