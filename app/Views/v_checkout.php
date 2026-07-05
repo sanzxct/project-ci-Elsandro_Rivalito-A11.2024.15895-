@@ -48,6 +48,18 @@
                 'readonly' => true
             ]) ?>
         </div>
+
+        <div class="col-12">
+            <?= form_label('Kode Voucher', 'voucher_code', ['class' => 'form-label']) ?>
+            <?= form_input([
+                'name'        => 'voucher_code',
+                'id'          => 'voucher_code',
+                'class'       => 'form-control',
+                'placeholder' => 'Contoh: PROMO2025'
+            ]) ?>
+            <small class="text-muted">Tersedia: PROMO2025 (10%), PROMO2026 (15%), AKHIRTAHUN (25%)</small>
+        </div>
+
         <div class="col-12">
             <?= form_submit(
                 'submit',
@@ -55,7 +67,6 @@
                 ['class' => 'btn btn-primary']
             ) ?>
         </div>
-
         <?= form_close() ?>
     </div>
     <div class="col-lg-6">
@@ -90,8 +101,28 @@
                 </tr>
                 <tr>
                     <td colspan="2"></td>
-                    <td>Total</td>
-                    <td><span id="total"><?= number_to_currency($total, 'IDR') ?></span></td>
+                    <td class="text-danger">Diskon Voucher</td>
+                    <td class="text-danger"><span id="diskon_voucher_display">-</span></td>
+                </tr>
+                <tr>
+                    <td colspan="2"></td>
+                    <td>Biaya Jasa</td>
+                    <td><span id="biaya_jasa_display">-</span></td>
+                </tr>
+                <tr>
+                    <td colspan="2"></td>
+                    <td class="text-success">Free Mouse</td>
+                    <td class="text-success"><span id="free_mouse_display">-</span></td>
+                </tr>
+                <tr>
+                    <td colspan="2"></td>
+                    <td class="text-primary fw-bold">Subtotal (+Jasa-Voucher-Free Mouse)</td>
+                    <td class="text-primary fw-bold"><span id="subtotal_promo_display">-</span></td>
+                </tr>
+                <tr>
+                    <td colspan="2"></td>
+                    <td class="fw-bold">Grand Total (incl. Ongkir)</td>
+                    <td class="fw-bold"><span id="total"><?= number_to_currency($total, 'IDR') ?></span></td>
                 </tr>
             </tbody>
         </table>
@@ -104,15 +135,72 @@
     $(document).ready(function() {
         let ongkir = 0;
         let subtotal = <?= $total ?>;
-        hitungTotal();
+
+        let biayaJasa = 0;
+        let diskonVoucher = 0;
+        let freeMouse = 0;
+        let subtotalPromo = subtotal;
+        let voucherPercent = 0;
+
+        hitungPromo(); // panggil pertama kali saat halaman dimuat
+
+        function formatIDR(angka) {
+            return `IDR ${Math.round(angka).toLocaleString('id-ID')}`;
+        }
+
+        function hitungPromo() {
+            let voucherCode = $("#voucher_code").val();
+
+            $.ajax({
+                url: "<?= site_url('ajax/promo') ?>",
+                dataType: "json",
+                data: {
+                    total_harga: subtotal,
+                    voucher_code: voucherCode
+                },
+                success: function(data) {
+                    biayaJasa      = parseFloat(data.biaya_jasa);
+                    diskonVoucher  = parseFloat(data.diskon_voucher);
+                    freeMouse      = parseFloat(data.free_mouse);
+                    subtotalPromo  = parseFloat(data.subtotal_promo);
+                    voucherPercent = parseInt(data.voucher_percent);
+
+                    $("#biaya_jasa_display").text(formatIDR(biayaJasa));
+
+                    if (diskonVoucher > 0) {
+                        $("#diskon_voucher_display").text('-' + formatIDR(diskonVoucher) + ` (${voucherPercent}%)`);
+                    } else {
+                        $("#diskon_voucher_display").text('-' + formatIDR(0));
+                    }
+
+                    if (freeMouse > 0) {
+                        $("#free_mouse_display").text('-' + formatIDR(freeMouse));
+                    } else {
+                        $("#free_mouse_display").text(formatIDR(0));
+                    }
+
+                    $("#subtotal_promo_display").text(formatIDR(subtotalPromo));
+
+                    hitungTotal();
+                }
+            });
+        }
 
         function hitungTotal() {
-            let total = subtotal + ongkir;
+            let total = subtotalPromo + ongkir;
 
             $("#ongkir").val(ongkir);
-            $("#total").text(`IDR ${total.toLocaleString('id-ID')}`);
+            $("#total").text(formatIDR(total));
             $("#total_harga").val(total);
         }
+
+        let voucherTimer;
+        $("#voucher_code").on('keyup', function() {
+            clearTimeout(voucherTimer);
+            voucherTimer = setTimeout(function() {
+                hitungPromo();
+            }, 400);
+        });
 
         // 1. Inisialisasi Select2
         $('#kelurahan').select2({
@@ -140,13 +228,11 @@
         $("#kelurahan").on('change', function() {
             let id_kelurahan = $(this).val();
 
-            // Reset dropdown layanan dan total
             $("#layanan").empty();
             $("#layanan").append('<option value="" selected disabled>Pilih Layanan Pengiriman</option>');
             ongkir = 0;
             hitungTotal();
 
-            // Pindahkan AJAX Cost ke dalam sini
             $.ajax({
                 url: "<?= site_url('ajax/costs') ?>",
                 dataType: "json",
@@ -157,7 +243,7 @@
                     data.forEach(function(item) {
                         $("#layanan").append(
                             $('<option>', {
-                                value: item.cost, // Memasukkan harga ke dalam value option
+                                value: item.cost,
                                 text: `${item.description} (${item.service}) : IDR ${parseInt(item.cost).toLocaleString('id-ID')} (Est: ${item.etd})`
                             })
                         );
@@ -171,13 +257,8 @@
 
         // 3. Ketika Layanan dipilih -> Update Ongkir dan Total Harga
         $("#layanan").on('change', function() {
-            // Ambil value dari dropdown layanan (berisi nominal cost)
             let selectedCost = $(this).val();
-            
-            // Ubah string menjadi angka (integer), jika kosong jadikan 0
-            ongkir = parseInt(selectedCost) || 0; 
-            
-            // Jalankan fungsi hitung ulang
+            ongkir = parseInt(selectedCost) || 0;
             hitungTotal();
         });
     });
