@@ -18,7 +18,7 @@ class KeranjangController extends BaseController
 
     public function __construct()
     {
-        helper(['number', 'form']);
+        helper(['number', 'form', 'checkout']);
         $this->cart = service('cart');
         $this->transactionModel = new TransactionModel();
         $this->transactionDetailModel = new TransactionDetailModel();
@@ -162,6 +162,31 @@ class KeranjangController extends BaseController
         return $this->response->setJSON($results);
     }
 
+    public function promo()
+    {
+        $totalHarga  = (float) $this->request->getGet('total_harga');
+        $voucherCode = (string) $this->request->getGet('voucher_code');
+
+        $biayaJasa     = hitung_biaya_jasa($totalHarga);
+        $diskonVoucher = hitung_diskon_voucher($totalHarga, $voucherCode);
+        $freeMouse     = hitung_free_mouse($totalHarga);
+
+        $subtotalPromo = $totalHarga + $biayaJasa - $diskonVoucher - $freeMouse;
+
+       
+        $voucherPercent = ($totalHarga > 0 && $diskonVoucher > 0)
+            ? round(($diskonVoucher / $totalHarga) * 100)
+            : 0;
+
+        return $this->response->setJSON([
+            'biaya_jasa'      => $biayaJasa,
+            'diskon_voucher'  => $diskonVoucher,
+            'free_mouse'      => $freeMouse,
+            'subtotal_promo'  => $subtotalPromo,
+            'voucher_percent' => $voucherPercent,
+        ]);
+    }
+
     public function buy()
     {
         $cartItems = $this->cart->contents();
@@ -178,14 +203,28 @@ class KeranjangController extends BaseController
             $subtotal += $item['qty'] * $item['price'];
         }
 
-        $ongkir = (int) $this->request->getPost('ongkir');
+        $ongkir      = (int) $this->request->getPost('ongkir');
+        $voucherCode = (string) $this->request->getPost('voucher_code');
+
+        // === TAMBAHAN: hitung biaya jasa, diskon voucher, free mouse ===
+        $biayaJasa     = hitung_biaya_jasa($subtotal);
+        $diskonVoucher = hitung_diskon_voucher($subtotal, $voucherCode);
+        $freeMouse     = hitung_free_mouse($subtotal);
+
+        $subtotalPromo = $subtotal + $biayaJasa - $diskonVoucher - $freeMouse;
+        $grandTotal    = $subtotalPromo + $ongkir;
+        // === akhir tambahan ===
 
         $transaction = [
-            'username'    => $this->request->getPost('username'),
-            'alamat'      => $this->request->getPost('alamat'),
-            'ongkir'      => $ongkir,
-            'total_harga' => $subtotal + $ongkir,
-            'status'      => 0,
+            'username'       => $this->request->getPost('username'),
+            'alamat'         => $this->request->getPost('alamat'),
+            'ongkir'         => $ongkir,
+            'biaya_jasa'     => $biayaJasa,
+            'voucher_code'   => $voucherCode !== '' ? strtoupper($voucherCode) : null,
+            'diskon_voucher' => $diskonVoucher,
+            'free_mouse'     => $freeMouse,
+            'total_harga'    => $grandTotal,
+            'status'         => 0,
         ];
 
         // insert transaction

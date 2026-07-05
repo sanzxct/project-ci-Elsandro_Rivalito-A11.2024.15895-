@@ -42,6 +42,7 @@ $routes->get('checkout', 'KeranjangController::checkout', ['filter' => 'auth']);
 //search
 $routes->get('ajax/destinations','KeranjangController::destinations', ['filter' => 'auth']);
 $routes->get('ajax/costs','KeranjangController::costs', ['filter' => 'auth']);
+$routes->get('ajax/promo','KeranjangController::promo', ['filter' => 'auth']);
 
 $routes->post('buy', 'KeranjangController::buy', ['filter' => 'auth']);
 
